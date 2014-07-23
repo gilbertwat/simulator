@@ -6,6 +6,8 @@ import java.util.UUID;
  * Created by Gilbert on 7/22/2014.
  */
 public class Visitor {
+    //For the bonus AI part, the attribute of the visitor like casual, linger, speedo, can be put here
+
     public final UUID uuid;
     public final String name;
     public int posX;

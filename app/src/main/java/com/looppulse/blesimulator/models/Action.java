@@ -7,6 +7,7 @@ public class Action {
 
     public enum Type {
         SPAWN,
+        DESPAWN,
         GO_LEFT,
         GO_RIGHT,
         GO_UP,
@@ -16,8 +17,10 @@ public class Action {
     //to simplify time is in 1s frame
     public final int time;
     public final Type action;
+    public final Visitor visitor;
 
-    public Action(int time, Type action) {
+    public Action(Visitor v, int time, Type action) {
+        this.visitor = v;
         this.time = time;
         this.action = action;
     }

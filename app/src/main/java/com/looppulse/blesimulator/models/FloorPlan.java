@@ -5,17 +5,14 @@ package com.looppulse.blesimulator.models;
  */
 public class FloorPlan {
 
-    //HERE of coz it is better to use config file or describe in the json
-    public static final Integer WIDTH = 5;
-    public static final Integer HEIGHT = 5;
-
     //use space instead of CPU cycle
+    //0,0 in the top-left corner
     public final Boolean map[][];
 
-    public FloorPlan(int range, int posX, int posY) {
-        map = new Boolean[WIDTH][HEIGHT];
-        for (int i=0; i< WIDTH; i++) {
-            for (int j=0; j< HEIGHT; j++) {
+    public FloorPlan(int width, int height, int range, int posX, int posY) {
+        map = new Boolean[width][height];
+        for (int i=0; i< width; i++) {
+            for (int j=0; j< height; j++) {
                 if(i >= posX - range && i <= posX + range
                         && j >= posY - range && j <= posY + range
                         ) {
