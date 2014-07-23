@@ -18,4 +18,23 @@
         android:layout_alignParentStart="true"
         android:id="@+id/mBtnStartSimulator" />
 
+    <Button
+        android:text="@string/btn_upload_sample_world"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/mBtnStartSimulator"
+        android:id="@+id/mBtnUploadSampleWorld" />
+    <Button
+        android:text="@string/btn_change_endpoint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/mBtnUploadSampleWorld"
+        android:id="@+id/mBtnChangeEndPoint" />
+
 </RelativeLayout>

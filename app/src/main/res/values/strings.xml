@@ -5,5 +5,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="btn_start_simulator">Start simulator</string>
+    <string name="btn_upload_sample_world">Upload sample world</string>
+    <string name="btn_change_endpoint">Change end point</string>
+    <string name="title_activity_change_endpoint">ChangeEndpointActivity</string>
+    <string name="current_server">Current Server</string>
+    <string name="btn_change" >Change</string>
 
 </resources>
