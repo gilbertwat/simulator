@@ -24,6 +24,8 @@ public class FloorPlan {
         }
     }
 
+
+
     //O(1) for the win
     public Boolean isInRange(int posX, int posY) {
         return map[posX][posY];

@@ -27,12 +27,12 @@ public class World {
 
     public static World getSampleWorld() {
         final UUID uuid = UUID.randomUUID();
-        final Beacon maleShoe = new Beacon(uuid, (short)0, (short)0, 2, 4, 0);
-        final Beacon femaleShoe = new Beacon(uuid, (short)0, (short)1, 2, 4, 4);
-        final Beacon maleClothes = new Beacon(uuid, (short)0, (short)2, 2, 0, 2);
-        final Beacon femaleClothes = new Beacon(uuid, (short)0, (short)3, 2, 4, 2);
-        final Beacon tryingArea = new Beacon(uuid, (short)1, (short)0, 1, 0, 0);
-        final Beacon cashier = new Beacon(uuid, (short)1, (short)1, 1, 4, 0);
+        final Beacon maleShoe = new Beacon(uuid, (short)0, (short)0, 5, 5, 2, 4, 0);
+        final Beacon femaleShoe = new Beacon(uuid, (short)0, (short)1, 5, 5, 2, 4, 4);
+        final Beacon maleClothes = new Beacon(uuid, (short)0, (short)2, 5, 5, 2, 0, 2);
+        final Beacon femaleClothes = new Beacon(uuid, (short)0, (short)3, 5, 5, 2, 4, 2);
+        final Beacon tryingArea = new Beacon(uuid, (short)1, (short)0, 5, 5, 1, 0, 0);
+        final Beacon cashier = new Beacon(uuid, (short)1, (short)1, 5, 5, 1, 4, 0);
         final List<Beacon> beacons = Lists.newArrayList();
         beacons.add(maleShoe);
         beacons.add(femaleShoe);
