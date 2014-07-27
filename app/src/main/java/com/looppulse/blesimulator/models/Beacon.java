@@ -1,11 +1,16 @@
 package com.looppulse.blesimulator.models;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.google.common.eventbus.AllowConcurrentEvents;
+
 import java.util.UUID;
 
 /**
  * Created by Gilbert on 7/22/2014.
  */
 public class Beacon {
+
+
     public final UUID uuid;
     public final Short major;
     public final Short minor;
@@ -22,7 +27,7 @@ public class Beacon {
      * @param posX 0 based
      * @param posY 0 based
      */
-    public Beacon(UUID uuid, Short major, Short minor, int range, int width, int height, int posX, int posY) {
+    public Beacon(UUID uuid, Short major, Short minor, int width, int height, int range, int posX, int posY) {
         this.uuid = uuid;
         this.major = major;
         this.minor = minor;

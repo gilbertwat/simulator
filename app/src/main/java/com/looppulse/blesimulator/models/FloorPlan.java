@@ -1,5 +1,7 @@
 package com.looppulse.blesimulator.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Created by Gilbert on 7/22/2014.
  */
@@ -7,6 +9,7 @@ public class FloorPlan {
 
     //use space instead of CPU cycle
     //0,0 in the top-left corner
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public final Boolean map[][];
 
     public FloorPlan(int width, int height, int range, int posX, int posY) {
@@ -16,9 +19,9 @@ public class FloorPlan {
                 if(i >= posX - range && i <= posX + range
                         && j >= posY - range && j <= posY + range
                         ) {
-                    map[i][j] = true;
+                    map[i][j] = Boolean.TRUE;
                 } else {
-                    map[i][j] = false;
+                    map[i][j] = Boolean.FALSE;
                 }
             }
         }

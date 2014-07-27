@@ -1,5 +1,6 @@
 package com.looppulse.blesimulator.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.looppulse.blesimulator.api.Event;
 
@@ -25,6 +26,8 @@ public class Visitor {
     public final String name;
     public int posX;
     public int posY;
+
+    @JsonIgnore
     public final int enterRegionSignalCount = 5;
     public List<VisitorEnterSignal> beaconsContains = Lists.newArrayList();
 
