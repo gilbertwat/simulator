@@ -17,7 +17,15 @@ public class World {
     public final List<Beacon> beacons;
     public final List<Visitor> visitors;
 
-    public World(Integer width, Integer height, List<Action> actions, List<Beacon> beacons, List<Visitor> visitors) {
+    public World(final List<Action> actions, final List<Beacon> beacons, final List<Visitor> visitors) {
+        this.width = 0; //not important
+        this.height = 0; //not important
+        this.actions = actions;
+        this.beacons = beacons;
+        this.visitors = visitors;
+    }
+
+    public World(final Integer width, final Integer height, final List<Action> actions, final List<Beacon> beacons, final List<Visitor> visitors) {
         this.width = width;
         this.height = height;
         this.actions = actions;
@@ -92,5 +100,6 @@ public class World {
 
         return new World(5, 5, actions, beacons, visitors);
     }
+
 }
 

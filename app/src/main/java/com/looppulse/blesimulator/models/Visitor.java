@@ -22,6 +22,11 @@ public class Visitor {
         }
     }
 
+    public static final String KEY_UUID = "uuid";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_POS_X = "posX";
+    public static final String KEY_POS_Y = "posY";
+
     public final UUID uuid;
     public final String name;
     public int posX;

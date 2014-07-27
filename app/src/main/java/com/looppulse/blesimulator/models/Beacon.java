@@ -10,6 +10,10 @@ import java.util.UUID;
  */
 public class Beacon {
 
+    public static final String KEY_UUID = "uuid";
+    public static final String KEY_MAJOR = "major";
+    public static final String KEY_MINOR = "minor";
+    public static final String KEY_AREA_COVERED = "areaCovered";
 
     public final UUID uuid;
     public final Short major;
@@ -33,5 +37,13 @@ public class Beacon {
         this.minor = minor;
         //TODO some validation
         this.areaCovered = new FloorPlan(width, height, range, posX, posY);
+    }
+
+    public Beacon(UUID uuid, Short major, Short minor, FloorPlan fp) {
+        this.uuid = uuid;
+        this.major = major;
+        this.minor = minor;
+        //TODO some validation
+        this.areaCovered = fp;
     }
 }
