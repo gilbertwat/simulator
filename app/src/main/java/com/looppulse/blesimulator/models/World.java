@@ -25,6 +25,14 @@ public class World {
         this.visitors = visitors;
     }
 
+    public World() {
+        this.width = 0;
+        this.height = 0;
+        this.actions = null;
+        this.beacons = null;
+        this.visitors = null;
+    }
+
     public World(final Integer width, final Integer height, final List<Action> actions, final List<Beacon> beacons, final List<Visitor> visitors) {
         this.width = width;
         this.height = height;

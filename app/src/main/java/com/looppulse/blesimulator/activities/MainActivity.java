@@ -16,7 +16,9 @@ import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.looppulse.blesimulator.R;
+import com.looppulse.blesimulator.models.Action;
 import com.looppulse.blesimulator.models.Beacon;
 import com.looppulse.blesimulator.models.FloorPlan;
 import com.looppulse.blesimulator.models.Visitor;
@@ -28,6 +30,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,25 +47,72 @@ public class MainActivity extends Activity {
 
     private Integer time;
 
+    private Integer maxTime;
+
     private static final Logger logger = LoggerFactory.getLogger(MainActivity.class);
 
-    private AtomicReference<World> mWorld;
+    private AtomicReference<World> mWorld = new AtomicReference<World>();
+    private Set<UUID> mIVisitors = Sets.newHashSet();
 
     private void onReadApiCompleted() {
         if (mWorld.get().actions != null && mWorld.get().beacons != null && mWorld.get().visitors != null) {
             logger.info("Load Success");
-            //TODO Use a looper to run Action for every 1 sec
+            Timer t = new Timer();
+            TimerTask tt = new TimerTask() {
+                @Override
+                public void run() {
+                    if (time < maxTime) {
+                        logger.info("Time: " + time + "s");
+                        t
+                        time++;
+                    }
+                }
+            };
+
+
+            t.scheduleAtFixedRate(tt, 0, 1000);
+
             //TODO each action will check condition of visitior is in any beacon or not
             //TODO fire event accordingly
         }
     }
 
     private void onBtnStartSimulatorClick() {
+        mWorld.getAndSet(new World());
         final Firebase firebaseActions = new Firebase(s + "test/actions");
         firebaseActions.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //TODO depends on Visitors dont want callback hell
+                List<Map<String, Object>> actions = (List<Map<String, Object>>) dataSnapshot.getValue();
+                List<Action> resultant = Lists.newArrayList();
+
+                for (Map<String, Object> map : actions) {
+                    Action action = null;
+                    if (mWorld.get().visitors == null) { //if actions is faster than visitors
+                        //TODO observer pattern to observe visitor call is done
+                        UUID iVisitors = UUID.fromString((String)map.get(Action.KEY_I_VISITOR));
+                        action = new Action(iVisitors, (Integer)map.get(Action.KEY_TIME), Action.Type.valueOf((String)map.get(Action.KEY_ACTION)));
+                    } else { //if visitors
+                       //TODO observer pattern
+                       UUID iVisitors = UUID.fromString((String) map.get(Action.KEY_I_VISITOR));
+                        for (Visitor v : mWorld.get().visitors) {
+                            if (v.uuid.equals(iVisitors)) {
+                                action = new Action(v, ((Long)map.get(Action.KEY_TIME)).intValue(), Action.Type.valueOf((String)map.get(Action.KEY_ACTION)));
+                                break;
+                            }
+                        }
+                        checkNotNull(action);
+                    }
+                    resultant.add(action);
+                    if (maxTime < action.time) {
+                        maxTime = action.time;
+                    }
+                }
+
+                mWorld.getAndSet(new World(resultant, mWorld.get().beacons, mWorld.get().visitors));
+
+                logger.info("Action read:" + actions.toString());
+                onReadApiCompleted();
             }
 
             @Override
@@ -78,16 +130,19 @@ public class MainActivity extends Activity {
                         (List<Map<String, Object>>)dataSnapshot.getValue();
                 final List<Beacon> resultant = Lists.newArrayList();
                 for (Map<String, Object> v : beacons) {
-                    List<List<Boolean>> fp = (List<List<Boolean>>)v.get(v.get(Beacon.KEY_AREA_COVERED));
+                    List<List<Boolean>> fp = (List<List<Boolean>>)((Map)v.get(Beacon.KEY_AREA_COVERED)).get(FloorPlan.KEY_MAP);
 
                     Beacon rv = new Beacon(UUID.fromString((String)v.get(Beacon.KEY_UUID)),
-                            (Short)v.get(Beacon.KEY_MAJOR),
-                            (Short)v.get(Beacon.KEY_MINOR),
+                            ((Long)v.get(Beacon.KEY_MAJOR)).shortValue(),
+                            ((Long)v.get(Beacon.KEY_MINOR)).shortValue(),
                             new FloorPlan(fp));
                     resultant.add(rv);
                 }
                 mWorld.getAndSet(new World(mWorld.get().actions, resultant, mWorld.get().visitors));
-                logger.info("Beacons read:" + beacons.toString());            }
+                logger.info("Beacons read:" + beacons.toString());
+
+                onReadApiCompleted();
+            }
 
             @Override
             public void onCancelled() {
@@ -105,12 +160,27 @@ public class MainActivity extends Activity {
                 for (Map<String, Object> v : visitors) {
                     Visitor rv = new Visitor(UUID.fromString((String)v.get(Visitor.KEY_UUID)),
                             (String)v.get(Visitor.KEY_NAME),
-                            (Integer)v.get(Visitor.KEY_POS_X),
-                             (Integer)v.get(Visitor.KEY_POS_Y));
+                            ((Long)v.get(Visitor.KEY_POS_X)).intValue(),
+                            ((Long)v.get(Visitor.KEY_POS_Y)).intValue());
                     resultant.add(rv);
                 }
-                mWorld.getAndSet(new World(mWorld.get().actions, mWorld.get().beacons, resultant));
+
+                List<Action> resultantActions = mWorld.get().actions;
+                if (resultantActions != null) { //TODO should use observable
+                    for (Visitor v : resultant) {
+                        for (int i = 0; i < resultantActions.size(); i++) {
+                            if (resultantActions.get(i).iVisitor.equals(v.uuid)) {
+                                Action oldAction = resultantActions.get(i);
+                                resultantActions.set(i, new Action(v, oldAction.time, oldAction.action));
+                            }
+                        }
+                    }
+                }
+
+                mWorld.getAndSet(new World(resultantActions, mWorld.get().beacons, resultant));
                 logger.info("Visitors read:" + resultant.toString());
+
+                onReadApiCompleted();
 
             }
 

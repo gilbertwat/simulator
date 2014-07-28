@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class FloorPlan {
 
+    public static final Object KEY_MAP = "map";
     //use space instead of CPU cycle
     //0,0 in the top-left corner
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -20,7 +21,7 @@ public class FloorPlan {
     public FloorPlan(List<List<Boolean>> fp) {
         checkState(fp.size() > 0);
         checkState(fp.get(0).size() > 0);
-        this.map = new Boolean[][][fp.size()][fp.get(0).size()];
+        this.map = new Boolean[fp.size()][fp.get(0).size()];
         int i = 0;
         for (List<Boolean> bs : fp) {
             int j = 0;

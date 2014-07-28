@@ -1,5 +1,7 @@
 package com.looppulse.blesimulator.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -22,10 +24,24 @@ public class Action {
     //to simplify time is in 1s frame
     public final int time;
     public final Type action;
-    public final Map<UUID, Boolean> visitor = Maps.newHashMap();
+    public final UUID iVisitor;
+    @JsonIgnore
+    public final Visitor visitor;
+
+    public static final String KEY_TIME = "time";
+    public static final String KEY_ACTION = "action";
+    public static final String KEY_I_VISITOR = "iVisitor";
 
     public Action(Visitor v, int time, Type action) {
-        this.visitor.put(v.uuid, Boolean.TRUE);
+        this.iVisitor = v.uuid;
+        this.visitor = v;
+        this.time = time;
+        this.action = action;
+    }
+
+    public Action(UUID v, int time, Type action) {
+        this.iVisitor = v;
+        this.visitor = null;
         this.time = time;
         this.action = action;
     }
