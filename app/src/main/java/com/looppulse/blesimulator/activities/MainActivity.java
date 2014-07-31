@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.looppulse.blesimulator.R;
+import com.looppulse.blesimulator.api.Event;
 import com.looppulse.blesimulator.models.Action;
 import com.looppulse.blesimulator.models.Beacon;
 import com.looppulse.blesimulator.models.FloorPlan;
@@ -28,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements Event.UiUpdater {
 
     private Button mBtnStartSimulator, mBtnUploadSampleWorld,mBtnChangeEndPoint;
 
@@ -50,6 +53,7 @@ public class MainActivity extends Activity {
     private Integer maxTime;
 
     private static final Logger logger = LoggerFactory.getLogger(MainActivity.class);
+    public static final String SP_KEY_TEST_NAME = "TEST_NAME";
 
     private AtomicReference<World> mWorld = new AtomicReference<World>();
     private Set<UUID> mIVisitors = Sets.newHashSet();
@@ -57,14 +61,16 @@ public class MainActivity extends Activity {
     private void onReadApiCompleted() {
         if (mWorld.get().actions != null && mWorld.get().beacons != null && mWorld.get().visitors != null) {
             logger.info("Load Success");
-            Timer t = new Timer();
+            final Timer t = new Timer();
             TimerTask tt = new TimerTask() {
                 @Override
                 public void run() {
                     if (time < maxTime) {
                         logger.info("Time: " + time + "s");
-                        t
+                        mWorld.get().update(time);
                         time++;
+                    } else {
+                        t.cancel();
                     }
                 }
             };
@@ -72,13 +78,11 @@ public class MainActivity extends Activity {
 
             t.scheduleAtFixedRate(tt, 0, 1000);
 
-            //TODO each action will check condition of visitior is in any beacon or not
-            //TODO fire event accordingly
         }
     }
 
     private void onBtnStartSimulatorClick() {
-        mWorld.getAndSet(new World());
+        mWorld.getAndSet(new World(this));
         final Firebase firebaseActions = new Firebase(s + "test/actions");
         firebaseActions.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -109,7 +113,7 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                mWorld.getAndSet(new World(resultant, mWorld.get().beacons, mWorld.get().visitors));
+                mWorld.getAndSet(new World(mWorld.get().context, resultant, mWorld.get().beacons, mWorld.get().visitors));
 
                 logger.info("Action read:" + actions.toString());
                 onReadApiCompleted();
@@ -138,7 +142,7 @@ public class MainActivity extends Activity {
                             new FloorPlan(fp));
                     resultant.add(rv);
                 }
-                mWorld.getAndSet(new World(mWorld.get().actions, resultant, mWorld.get().visitors));
+                mWorld.getAndSet(new World(mWorld.get().context, mWorld.get().actions, resultant, mWorld.get().visitors));
                 logger.info("Beacons read:" + beacons.toString());
 
                 onReadApiCompleted();
@@ -177,7 +181,7 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                mWorld.getAndSet(new World(resultantActions, mWorld.get().beacons, resultant));
+                mWorld.getAndSet(new World(mWorld.get().context, resultantActions, mWorld.get().beacons, resultant));
                 logger.info("Visitors read:" + resultant.toString());
 
                 onReadApiCompleted();
@@ -195,7 +199,7 @@ public class MainActivity extends Activity {
 
     private void onBtnUploadSampleWorld() {
         final Firebase firebase = new Firebase(s + "test");
-        World world = World.getSampleWorld();
+        World world = World.getSampleWorld(this);
 
         firebase.setValue(world);
     }
@@ -238,6 +242,22 @@ public class MainActivity extends Activity {
         SharedPreferences sp = getSharedPreferences(ChangeEndpointActivity.SP_NAME_ENDPOINT, Activity.MODE_PRIVATE);
         s = sp.getString(ChangeEndpointActivity.SP_KEY_ENDPOINT, ChangeEndpointActivity.DEFAULT_ENDPOINT);
 
+        //TODO configurable? check duplicate?
+        SecureRandom random = new SecureRandom();
+        String testName = new BigInteger(130, random).toString(32);
+
+        sp.edit().putString(SP_KEY_TEST_NAME, testName);
+
+    }
+
+
+    @Override
+    public void doEnterRegion() {
+        
+    }
+
+    @Override
+    public void doExitRegion() {
 
     }
 }

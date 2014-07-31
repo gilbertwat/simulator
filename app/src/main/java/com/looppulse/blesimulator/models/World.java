@@ -1,5 +1,8 @@
 package com.looppulse.blesimulator.models;
 
+import android.content.Context;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -9,6 +12,10 @@ import java.util.UUID;
  * Created by Gilbert on 7/23/2014.
  */
 public class World {
+
+    @JsonIgnore
+    public final Context context;
+
     public final Integer width;
     public final Integer height;
 
@@ -17,7 +24,8 @@ public class World {
     public final List<Beacon> beacons;
     public final List<Visitor> visitors;
 
-    public World(final List<Action> actions, final List<Beacon> beacons, final List<Visitor> visitors) {
+    public World(final Context context, final List<Action> actions, final List<Beacon> beacons, final List<Visitor> visitors) {
+        this.context = context;
         this.width = 0; //not important
         this.height = 0; //not important
         this.actions = actions;
@@ -25,7 +33,8 @@ public class World {
         this.visitors = visitors;
     }
 
-    public World() {
+    public World(Context context) {
+        this.context = context;
         this.width = 0;
         this.height = 0;
         this.actions = null;
@@ -33,7 +42,8 @@ public class World {
         this.visitors = null;
     }
 
-    public World(final Integer width, final Integer height, final List<Action> actions, final List<Beacon> beacons, final List<Visitor> visitors) {
+    public World(final Context context, final Integer width, final Integer height, final List<Action> actions, final List<Beacon> beacons, final List<Visitor> visitors) {
+        this.context = context;
         this.width = width;
         this.height = height;
         this.actions = actions;
@@ -41,7 +51,7 @@ public class World {
         this.visitors = visitors;
     }
 
-    public static World getSampleWorld() {
+    public static World getSampleWorld(Context context) {
         final UUID uuid = UUID.randomUUID();
         final Beacon maleShoe = new Beacon(uuid, (short)0, (short)0, 5, 5, 2, 4, 0);
         final Beacon femaleShoe = new Beacon(uuid, (short)0, (short)1, 5, 5, 2, 4, 4);
@@ -106,7 +116,59 @@ public class World {
         actions.add(new Action(alana, 13, Action.Type.GO_RIGHT));
         actions.add(new Action(alana, 14, Action.Type.DESPAWN));
 
-        return new World(5, 5, actions, beacons, visitors);
+        return new World(context, 5, 5, actions, beacons, visitors);
+    }
+
+    public void update(Integer time) {
+        for (Action a : actions) {
+            if (a.time == time) {
+                switch(a.action) {
+                    case SPAWN:
+                        a.visitor.isAlive = Boolean.TRUE;
+                    break;
+                    case DESPAWN:
+                        a.visitor.isAlive = Boolean.FALSE;
+                        break;
+                    case GO_UP:
+                        a.visitor.posY--;
+                        break;
+                    case GO_RIGHT:
+                        a.visitor.posX++;
+                        break;
+                    case GO_DOWN:
+                        a.visitor.posY++;
+                        break;
+                    case GO_LEFT:
+                        a.visitor.posX--;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+
+
+                }
+            }
+        }
+        for (Visitor v : visitors) {
+            if (v.isAlive) {
+                for (Beacon b : beacons) {
+                    if (b.areaCovered.map[v.posX][v.posY]) {
+                        Boolean isAlreadyAdded = Boolean.FALSE;
+                        for (Visitor.VisitorEnterSignal vns : v.beaconsContains) {
+                            if (vns.beacon.equals(b)) {
+                                isAlreadyAdded = Boolean.TRUE;
+                            }
+                        }
+                        if (!isAlreadyAdded) {
+                            v.beaconsContains.add(new Visitor.VisitorEnterSignal(v, b));
+                        }
+                    }
+                }
+
+                for (Visitor.VisitorEnterSignal vns : v.beaconsContains) {
+                    v.isIn(context, vns.beacon);
+                }
+            }
+        }
     }
 
 }

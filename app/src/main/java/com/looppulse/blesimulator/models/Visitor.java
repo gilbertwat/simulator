@@ -1,5 +1,7 @@
 package com.looppulse.blesimulator.models;
 
+import android.content.Context;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.looppulse.blesimulator.api.Event;
@@ -11,13 +13,15 @@ import java.util.UUID;
  * Created by Gilbert on 7/22/2014.
  */
 public class Visitor {
-    //For the bonus AI part, the attribute of the visitor like casual, linger, speedo, can be put here
-    public class VisitorEnterSignal {
+    //TODO For the bonus AI part, the attribute of the visitor like casual, linger, speedo, can be put here
+    public static class VisitorEnterSignal {
         public final Beacon beacon;
+        public final Visitor visitor;
         public int count;
 
-        public VisitorEnterSignal(Beacon beacon) {
+        public VisitorEnterSignal(Visitor visitor, Beacon beacon) {
             this.beacon = beacon;
+            this.visitor = visitor;
             count = enterRegionSignalCount;
         }
     }
@@ -31,9 +35,11 @@ public class Visitor {
     public final String name;
     public int posX;
     public int posY;
+    public Boolean isAlive;
 
-    @JsonIgnore
-    public final int enterRegionSignalCount = 5;
+
+    public static final int enterRegionSignalCount = 5;
+
     public List<VisitorEnterSignal> beaconsContains = Lists.newArrayList();
 
     public Visitor(UUID uuid, String name, int initPosX, int initPosY) {
@@ -42,21 +48,25 @@ public class Visitor {
         this.name = name;
         this.posX = initPosX;
         this.posY = initPosY;
+        this.isAlive = Boolean.FALSE;
     }
 
-    public void refresh() {
-        //may call once per second
-        //loop through beaconsContains and fire Event.didRangeBeacons()
+    public void isIn(Context context, Beacon b) {
+        //TODO not efficient
+        for (VisitorEnterSignal v : beaconsContains) {
+            if (v.beacon.equals(b)) {
+                Event.didRangeBeacons(context, v);
+            }
+        }
     }
 
-    public void enter(Beacon b) {
-        //add b to beaconsContains
-        final VisitorEnterSignal v = new VisitorEnterSignal(b);
-        beaconsContains.add(v);
-        Event.didRangeBeacons(v);
-    }
-
-    public void exit(Beacon b) {
-        //remove b from
+    public void exit(Context context, Beacon b) {
+        for (VisitorEnterSignal v : beaconsContains) {
+            if (v.beacon.equals(b)) {
+                beaconsContains.remove(v);
+                Event.didExitRegion(context, v);
+                return;
+            }
+        }
     }
 }
