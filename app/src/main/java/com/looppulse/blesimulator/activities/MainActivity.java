@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +51,8 @@ public class MainActivity extends Activity implements Event.UiUpdater {
 
     private String s;
 
+    private LinearLayout llResult;
+
     private Integer time;
 
     private Integer maxTime;
@@ -57,6 +62,7 @@ public class MainActivity extends Activity implements Event.UiUpdater {
 
     private AtomicReference<World> mWorld = new AtomicReference<World>();
     private Set<UUID> mIVisitors = Sets.newHashSet();
+
 
     private void onReadApiCompleted() {
         if (mWorld.get().actions != null && mWorld.get().beacons != null && mWorld.get().visitors != null) {
@@ -239,6 +245,8 @@ public class MainActivity extends Activity implements Event.UiUpdater {
             }
         });
 
+        llResult = (LinearLayout)findViewById(R.id.llResult);
+
         SharedPreferences sp = getSharedPreferences(ChangeEndpointActivity.SP_NAME_ENDPOINT, Activity.MODE_PRIVATE);
         s = sp.getString(ChangeEndpointActivity.SP_KEY_ENDPOINT, ChangeEndpointActivity.DEFAULT_ENDPOINT);
 
@@ -252,12 +260,25 @@ public class MainActivity extends Activity implements Event.UiUpdater {
 
 
     @Override
-    public void doEnterRegion() {
-        
+    public void doEnterRegion(Visitor v, Beacon b, Date d) {
+        TextView tv = new TextView(this);
+        tv.setText(v.uuid.toString()
+                + " has entered " + b.uuid.toString()
+                + " with major " + b.major.toString()
+                + " and minot " + b.minor.toString()
+        );
+        llResult.addView(tv);
     }
 
     @Override
-    public void doExitRegion() {
+    public void doExitRegion(Visitor v, Beacon b, Date d) {
+        TextView tv = new TextView(this);
+        tv.setText(v.uuid.toString()
+                        + " has exited " + b.uuid.toString()
+                        + " with major " + b.major.toString()
+                        + " and minot " + b.minor.toString()
+        );
+        llResult.addView(tv);
 
     }
 }

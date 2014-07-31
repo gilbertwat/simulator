@@ -7,8 +7,10 @@ import android.content.SharedPreferences;
 import com.firebase.client.Firebase;
 import com.looppulse.blesimulator.activities.ChangeEndpointActivity;
 import com.looppulse.blesimulator.activities.MainActivity;
+import com.looppulse.blesimulator.models.Beacon;
 import com.looppulse.blesimulator.models.Visitor;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -37,16 +39,21 @@ public class Event {
         } else {
             Firebase firebase = new Firebase(endPoint + EVENT + testName);
             Firebase entry = firebase.push();
+            Date currTime = Calendar.getInstance().getTime();
+
             entry.setValue(new LogEntry(
-                    new Date().toString(),
+                    currTime.toString(),
                     v.visitor.uuid.toString(),
                     v.beacon.uuid.toString(),
                     v.beacon.major.toString(),
                     v.beacon.minor.toString(),
                     Type.didExitRegion.toString()));
 
+            if (v.count == Visitor.enterRegionSignalCount) {
+                ((UiUpdater) context).doEnterRegion(v.visitor, v.beacon, currTime);
+            }
             v.count--;
-            ((UiUpdater)context).doEnterRegion();
+
         }
     }
 
@@ -59,15 +66,16 @@ public class Event {
 
         Firebase firebase = new Firebase(endPoint + EVENT + testName);
         Firebase entry = firebase.push();
+        Date currTime = Calendar.getInstance().getTime();
         entry.setValue(new LogEntry(
-                            new Date().toString(),
+                            currTime.toString(),
                             v.visitor.uuid.toString(),
                             v.beacon.uuid.toString(),
                             v.beacon.major.toString(),
                             v.beacon.minor.toString(),
                             Type.didExitRegion.toString()));
 
-        ((UiUpdater)context).doExitRegion();
+        ((UiUpdater)context).doExitRegion(v.visitor, v.beacon, currTime);
     }
 
     public static class LogEntry {
@@ -89,8 +97,9 @@ public class Event {
     }
 
     public static interface UiUpdater {
-        public void doEnterRegion();
-        public void doExitRegion();
+        public void doEnterRegion(Visitor v, Beacon b, Date d);
+        public void doExitRegion(Visitor v, Beacon b, Date d);
     }
 
 }
+
